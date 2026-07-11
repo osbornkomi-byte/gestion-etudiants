@@ -1,0 +1,107 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f4f4;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Crect width='1440' height='320' fill='%230099ff'/%3E%3Cpath d='M0,288L30,240C60,192,120,96,180,85.3C240,75,300,149,360,176C420,203,480,181,540,154.7C600,128,660,96,720,96C780,96,840,128,900,160C960,192,1020,224,1080,218.7C1140,213,1200,171,1260,149.3C1320,128,1380,128,1410,128L1440,128' fill='none' stroke='%23ffffff' stroke-width='2'/%3E%3C/svg%3E");
+    background-size: cover;
+    background-position: bottom;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+h1 {
+    text-align: center;
+    color: #2c3e50;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+th {
+    background-color: #ecf0f1;
+}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    outline: none;
+    margin-right: 5px;
+    font-size: 0.9em;
+}
+.btn:hover {
+    background-color: #2980b9;
+}
+.btn-edit {
+    background-color: transparent;
+    color: #2ecc71;
+}
+.btn-edit:hover {
+    background-color: transparent;
+    color: #27ae60;
+}
+.btn-delete {
+    background-color: transparent;
+    color: #e74c3c;
+}
+.btn-delete:hover {
+    background-color: transparent;
+    color: #c0392b;
+}
+.action-links {
+    white-space: nowrap;
+}
+
+/* Form styles */
+.form-group {
+    margin-bottom: 0.8rem;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-weight: 600;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 3px rgba(52,152,219,.5);
+}
+.form-actions {
+    margin-top: 1rem;
+    text-align: right;
+}
+.form-actions .btn {
+    margin-left: 0.3rem;
+}

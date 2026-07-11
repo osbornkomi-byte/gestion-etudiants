@@ -1,0 +1,122 @@
+<?php
+require_once 'db.php';
+
+// Actions
+$action = $_GET['action'] ?? 'list';
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+// Helper for redirect with message
+function redirect_with_msg($url, $msg, $type = 'info') {
+    header("Location: $url?msg=" . urlencode($msg) . "&type=$type");
+    exit;
+}
+
+// Display message if present
+$msg = $_GET['msg'] ?? '';
+$type = $_GET['type'] ?? 'info';
+
+switch ($action) {
+    case 'add_form':
+        // Show add form
+        include 'templates/add_form.php';
+        break;
+
+    case 'add':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nom = trim($_POST['nom'] ?? '');
+            $prenom = trim($_POST['prenom'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $date_naissance = $_POST['date_naissance'] ?? '';
+            $filiere = trim($_POST['filiere'] ?? '');
+
+            if ($nom === '' || $prenom === '' || $email === '' || $date_naissance === '') {
+                redirect_with_msg('index.php?action=add_form', 'Tous les champs sauf filière sont requis.', 'error');
+            }
+            $stmt = $pdo->prepare('INSERT INTO etudiants (nom, prenom, email, date_naissance, filiere) VALUES (?,?,?,?,?)');
+            try {
+                $stmt->execute([$nom, $prenom, $email, $date_naissance, $filiere === '' ? null : $filiere]);
+                redirect_with_msg('index.php', 'Étudiant ajouté avec succès.', 'success');
+            } catch (PDOException $e) {
+                if ($e->getCode() == 23000) {
+                    redirect_with_msg('index.php?action=add_form', 'Cet email existe déjà.', 'error');
+                } else {
+                    throw $e;
+                }
+            }
+        } else {
+            redirect_with_msg('index.php?action=add_form', 'Méthode non autorisée.', 'error');
+        }
+        break;
+
+    case 'edit_form':
+        if ($id > 0) {
+            $stmt = $pdo->prepare('SELECT * FROM etudiants WHERE id = ?');
+            $stmt->execute([$id]);
+            $etudiant = $stmt->fetch();
+            if (!$etudiant) {
+                redirect_with_msg('index.php', 'Étudiant introuvable.', 'error');
+            }
+            include 'templates/edit_form.php';
+        } else {
+            redirect_with_msg('index.php', 'ID étudinant manquant.', 'error');
+        }
+        break;
+
+    case 'edit':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id > 0) {
+            $nom = trim($_POST['nom'] ?? '');
+            $prenom = trim($_POST['prenom'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $date_naissance = $_POST['date_naissance'] ?? '';
+            $filiere = trim($_POST['filiere'] ?? '');
+
+            if ($nom === '' || $prenom === '' || $email === '' || $date_naissance === '') {
+                redirect_with_msg("index.php?action=edit_form&id=$id", 'Tous les champs sauf filière sont requis.', 'error');
+            }
+            $stmt = $pdo->prepare('UPDATE etudiants SET nom=?, prenom=?, email=?, date_naissance=?, filiere=? WHERE id=?');
+            try {
+                $stmt->execute([$nom, $prenom, $email, $date_naissance, $filiere === '' ? null : $filiere, $id]);
+                redirect_with_msg('index.php', 'Étudiant mis à jour avec succès.', 'success');
+            } catch (PDOException $e) {
+                if ($e->getCode() == 23000) {
+                    redirect_with_msg("index.php?action=edit_form&id=$id", 'Cet email existe déjà pour un autre étudiant.', 'error');
+                } else {
+                    throw $e;
+                }
+            }
+        } else {
+            redirect_with_msg('index.php', 'Méthode non autorisée.', 'error');
+        }
+        break;
+
+    case 'delete':
+        if ($id > 0 && $_SERVER['REQUEST_METHOD'] === 'GET') {
+            $stmt = $pdo->prepare('DELETE FROM etudiants WHERE id = ?');
+            $stmt->execute([$id]);
+            redirect_with_msg('index.php', 'Étudiant supprimé.', 'success');
+        } else {
+            redirect_with_msg('index.php', 'Requête invalide.', 'error');
+        }
+        break;
+
+    case 'search':
+        $keyword = trim($_GET['keyword'] ?? '');
+        if ($keyword !== '') {
+            $stmt = $pdo->prepare('SELECT * FROM etudiants WHERE nom LIKE ? OR prenom LIKE ? OR email LIKE ? OR filiere LIKE ?');
+            $like = "%$keyword%";
+            $stmt->execute([$like, $like, $like, $like]);
+            $etudiants = $stmt->fetchAll();
+        } else {
+            $etudiants = [];
+        }
+        include 'templates/list.php';
+        break;
+
+    case 'list':
+    default:
+        $stmt = $pdo->query('SELECT * FROM etudiants ORDER BY nom, prenom');
+        $etudiants = $stmt->fetchAll();
+        include 'templates/list.php';
+        break;
+}
+?>
