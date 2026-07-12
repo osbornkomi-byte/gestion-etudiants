@@ -1,29 +1,38 @@
-# --------------------------------------------------------------
-# Dockerfile pour une application PHP pure (Apache + PDO MySQL)
-# --------------------------------------------------------------
-# Image officielle PHP avec Apache pré‑installé
-FROM php:8.2-apache
 
-# 1️⃣ Installer les extensions PDO dont on a besoin
-#    - pdo_mysql  → pour parler à MySQL/MariaDB
-#    - pdo_pgsql  → au cas où vous voudriez passer à PostgreSQL plus tard
-RUN apt-get update && apt-get install -y \
-        libzip-dev \
-        zip \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql \
-    && docker-php-ext-enable pdo pdo_mysql pdo_pgsql \
-    && rm -rf /var/lib/apt/lists/*
+  # --------------------------------------------------------------
+  # Dockerfile – application PHP/HTML/CSS avec Apache + PDO
+  # --------------------------------------------------------------
+  # Base officielle : PHP 8.2 + Apache sur Debian Bullseye
+  FROM php:8.2-apache-bullseye
 
-# 2️⃣ Copier le code source dans le répertoire servi par Apache
-WORKDIR /var/www/html
-COPY . .
+  # 1️⃣ Installation des outils nécessaires au gestionnaire de paquets
+  RUN apt-get update && apt-get install -y --no-install-recommends \
+          ca-certificates \
+          gnupg \
+          lsb-release \
+      && rm -rf /var/lib/apt/lists/*
 
-# 3️⃣ (Optionnel) Activer le module rewrite au cas où vous voudriez
-#    utiliser des URLs « propres » plus tard.
-RUN a2enmod rewrite
+  # 2️⃣ Installation des bibliothèques requises pour PDO
+  RUN apt-get update && apt-get install -y --no-install-recommends \
+          libzip-dev \
+          zip \
+          unzip \
+      && rm -rf /var/lib/apt/lists/*
 
-# 4️⃣ Exposer le port sur lequel Apache écoute (par défaut 80)
-EXPOSE 80
+  # 3️⃣ Installation des extensions PHP PDO
+  RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql \
+      && docker-php-ext-enable pdo_mysql pdo_pgsql \
+      && rm -rf /var/lib/apt/lists/*
 
-# 5️⃣ La commande par défaut de l’image officielle php:*-apache
-#    lance apache2 en mode foreground → aucun besoin de CMD supplémentaire.
+  # 4️⃣ (Optionnel) Activer le module rewrite d’Apache
+  RUN a2enmod rewrite
+
+  # 5️⃣ Copie du code source dans le répertoire servi par Apache
+  WORKDIR /var/www/html
+  COPY . .
+
+  # 6️⃣ Exposition du port 80 (Apache écoute dessus par défaut)
+  EXPOSE 80
+
+  # 7️⃣ La commande par défaut de l’image php:*-apache lance déjà
+  #    apache2-foreground, pas besoin de spécifier CMD.
